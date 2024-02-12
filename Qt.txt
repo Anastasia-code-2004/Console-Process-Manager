@@ -1,0 +1,129 @@
+#include <QCoreApplication>
+#include <iostream>
+#include <Windows.h>
+#include <string>
+
+
+int GetNumber()
+{
+    int num;
+    QString strNUMBER;
+    std::string s1;
+    std::cin >> s1;
+    strNUMBER = QString::fromStdString(s1);
+    while(!strNUMBER.toInt())
+    {
+      std::cout << "Error! You entered wrong. One more time:  ";
+      std::cin >> s1;
+      strNUMBER = QString::fromStdString(s1);
+    }
+    system("cls");
+    num = strNUMBER.toInt();
+    return num;
+}
+
+
+int main(int argc, char *argv[])
+{
+    QCoreApplication a(argc, argv);
+    HINSTANCE load;
+    load = LoadLibrary(L"C:\\Documents and Settings\\Anastasia\\Desktop\\lab8\\Dll\\Lab8_dll.dll");
+    typedef  void (*GetInfo)();
+
+    typedef  void (*Functions)(int);
+
+    GetInfo Info, Sort;
+    Functions LowEquMemUsage, InfoIsSuspendResume, SuspendProc, ResumeProc, TerminateProcess;
+
+    Info = (GetInfo)GetProcAddress(load, "GetGeneralInformation");
+    Sort = (GetInfo)GetProcAddress(load, "SortProcessesByID");
+    TerminateProcess = (Functions)GetProcAddress(load, "TermProcess");
+    LowEquMemUsage = (Functions)GetProcAddress(load, "LowEquMemory");
+    SuspendProc = (Functions)GetProcAddress(load, "SuspendProcessByID");
+    InfoIsSuspendResume = (Functions)GetProcAddress(load, "IsProcessSuspended");
+    ResumeProc = (Functions)GetProcAddress(load, "ResumeProcessByID");
+
+    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+    SetConsoleTextAttribute(hConsole, 3);
+    std::cout << "1 - get general information\n2 - sort by ID\n3 - terminate process by ID\n4 - filtered by memory\n5 - suspend process by ID\n6 - resume process by ID\n7 - exit\n";
+    int choose;
+    choose = GetNumber();
+    while(choose != 7)
+    {
+        if(choose == 1)
+        {
+            system("cls");
+            SetConsoleTextAttribute(hConsole, 14);
+            Info();
+            SetConsoleTextAttribute(hConsole, 10);
+        }
+        if(choose == 2)
+        {
+            system("cls");
+            SetConsoleTextAttribute(hConsole, 14);
+            Sort();
+            SetConsoleTextAttribute(hConsole, 10);
+            std::cout << '\n';
+
+        }
+        if(choose == 3)
+        {
+            int ID;
+            system("cls");
+            SetConsoleTextAttribute(hConsole, 11);
+            Sort();
+            SetConsoleTextAttribute(hConsole, 12);
+            std::cout << "Enter ID of process you want terminate:  ";
+            ID = GetNumber();
+            SetConsoleTextAttribute(hConsole, 3);
+            TerminateProcess(ID);
+
+        }
+        if(choose == 4)
+        {
+            int usage;
+            system("cls");
+            SetConsoleTextAttribute(hConsole, 11);
+
+            std::cout << "Enter amount of memory: ";
+            usage = GetNumber();;
+            SetConsoleTextAttribute(hConsole, 3);
+            LowEquMemUsage(usage);
+
+        }
+        if(choose == 5)
+        {
+            int ID;
+            system("cls");
+            SetConsoleTextAttribute(hConsole, 11);
+            Sort();
+            SetConsoleTextAttribute(hConsole, 5);
+            std::cout << "Enter ID of process you want suspend:  ";
+            ID = GetNumber();
+            SetConsoleTextAttribute(hConsole, 3);
+            SuspendProc(ID);
+            system("cls");
+
+        }
+        if(choose == 6)
+        {
+            system("cls");
+            SetConsoleTextAttribute(hConsole, 15);
+            int ID;
+            Sort();
+            std::cout << "Enter ID of process you want resume:  ";
+            ID = GetNumber();
+            ResumeProc(ID);
+            system("cls");
+        }
+
+        std::cout << "1 - get general information\n2 - sort by ID\n3 - terminate process by ID\n4 - filtered by memory\n5 - suspend process by ID\n6 - resume process by ID\n7 - exit\n";
+        choose = GetNumber();
+
+    }
+    system("cls");
+    SetConsoleTextAttribute(hConsole, 23);
+    std::cout << "Goodbye, my dear friend!\n";
+    FreeLibrary(load);
+    return 0;
+}
